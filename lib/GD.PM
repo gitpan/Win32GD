@@ -7,7 +7,7 @@ package GD;
 #           ---------
 #
 #   Alterations necessary for use in Win32 Perl made by
-#   Dave Roth <roth@panda.dnr.state.mi.us>
+#   Dave Roth <dave@roth.net> or <roth@panda.dnr.state.mi.us>
 #
 
 require Exporter;
@@ -19,18 +19,20 @@ require AutoLoader;
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
 @EXPORT = qw(
-	gdBrushed
-	gdDashSize
-	gdMaxColors
-	gdStyled
-	gdStyledBrushed
-	gdTiled
-	gdTransparent
+    gdBrushed
+    gdDashSize
+    gdMaxColors
+    gdStyled
+    gdStyledBrushed
+    gdTiled
+    gdTransparent
     gdSmallFont
     gdLargeFont
     gdMediumBoldFont
     gdTinyFont
 );
+
+
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
     # XS function.  If a constant is not found then control is passed
@@ -79,9 +81,16 @@ sub GD::fileno {
     return fileno "$package\:\:$fh";
 }
 
-# This handles the Gif method
-#   Modified for Win32::GD by Roth <rothd@infowire.com> 96.05.15
-#
+    ####
+    # This handles the Gif method
+    #   Modified for Win32::GD by Roth <dave@roth.net> 96.05.15
+    #
+    #   NOTE: This function returns a scalar 1 if the file could be opened
+    #         and a scalar 0 if the file could not be opened. These results
+    #         do not reflect whether or not the data was saved correctly to
+    #         the file.
+    #         This may cause problems if you  print $im->gif;
+    ####
 sub GD::Image::gif {
     my ($self, $File) = @_;
     my($Return);
@@ -100,9 +109,16 @@ sub GD::Image::gif {
     return $Return;
 }
 
-# This handles creation of gd data
-#   Modified for Win32::GD by Roth <rothd@infowire.com> 96.05.15
-#
+    ####
+    # This handles the Gd method
+    #   Modified for Win32::GD by Roth <dave@roth.net> 96.05.15
+    #
+    #   NOTE: This function returns a scalar 1 if the file could be opened
+    #         and a scalar 0 if the file could not be opened. These results
+    #         do not reflect whether or not the data was saved correctly to
+    #         the file.
+    #         This may cause problems if you  print $im->gd;
+    ####
 sub GD::Image::gd {
     my ($self, $File) = @_;
     my($Return);
@@ -120,6 +136,15 @@ sub GD::Image::gd {
     }
     return $Return;
 }
+
+
+#sub GD::Image::newFromGif {
+#    my ($self, $File) = @_;
+#    print "File=\"$File\" (" . fileno($File) . ")\n\n";
+#    binmode(fileno $File);
+#    $self->_newFromGif($File);
+#}
+
 
 ### The polygon object ###
 # create a new polygon

@@ -12,11 +12,17 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+
 #include "gd.h"
 #include "stdio.h"
 
+
 /* Copyright 1995, Lincoln D. Stein.  See accompanying README file for
 	usage restrictions */
+
+/*	Modified ever so slightly for work with Win32 Perl by
+	Dave Roth <dave@roth.net> or <roth@panda.dnr.state.mi.us> 96.05.18
+*/
 
 static int 
 not_here(CPerl *pPerl, char *s)
@@ -212,8 +218,7 @@ FILE* fh2file(CPerl *pPerl, char *fhandle, char *style)
   PUTBACK ;
   FREETMPS ;
   LEAVE ;
-
-  return fdopen(fd,style);
+  return fdopen(fd, style);
 }
 
 XS(XS_GD_constant)
@@ -287,6 +292,11 @@ XS(XS_GD__Image_gdnew)
 
 		gdImagePtr theImage;
 
+			//	We must set the CPerl object so that GD will know how to 
+			//	contend with with the overloaded functions.
+			//			roth	96.05.26
+		SetPerl(pPerl);	
+
 		theImage = gdImageCreate(x,y);
 
 		RETVAL = theImage;
@@ -316,18 +326,26 @@ XS(XS_GD__Image_gdnewFromGif)
 	    packname = (char *)SvPV(ST(0),na);
 	}
 	{
-
+	
 		gdImagePtr theImage;
 
-		FILE*	theFile;
+		FILE*	theFile = 0;
 
-		theFile = fh2file(pPerl, filehandle,"r");
-
+				//	Must make sure we open this in Readonly Binary "rb"
+				//	mode for Win32
+				//			Dave Roth	96.05.18
+		theFile = fh2file(pPerl, filehandle,"rb");
+								 
 		if (theFile == NULL) {
 
 			RETVAL = NULL;
 
 		} else {
+
+				//	We must set the CPerl object so that GD will know how to 
+				//	contend with with the overloaded functions.
+				//			roth	96.05.26
+			SetPerl(pPerl);	
 
 			theImage = gdImageCreateFromGif(theFile);
 
@@ -364,14 +382,23 @@ XS(XS_GD__Image_gdnewFromXbm)
 		gdImagePtr theImage;
 
 		FILE*	theFile;
+	
 
-		theFile = fh2file(pPerl, filehandle,"r");
+				//	Must make sure we open this in Readonly Binary "rb"
+				//	mode for Win32
+				//			Dave Roth	96.05.18
+		theFile = fh2file(pPerl, filehandle,"rb");
 
 		if (theFile == NULL) {
 
 			RETVAL = NULL;
 
 		} else {
+
+				//	We must set the CPerl object so that GD will know how to 
+				//	contend with with the overloaded functions.
+				//			roth	96.05.26
+			SetPerl(pPerl);	
 
 			theImage = gdImageCreateFromXbm(theFile);
 
@@ -408,14 +435,23 @@ XS(XS_GD__Image_gdnewFromGd)
 		gdImagePtr theImage;
 
 		FILE*	theFile;
+	
 
-		theFile = fh2file(pPerl, filehandle,"r");
+				//	Must make sure we open this in Readonly Binary "rb"
+				//	mode for Win32
+				//			Dave Roth	96.05.18
+		theFile = fh2file(pPerl, filehandle,"rb");
 
 		if (theFile == NULL) {
 
 			RETVAL = NULL;
 
 		} else {
+
+				//	We must set the CPerl object so that GD will know how to 
+				//	contend with with the overloaded functions.
+				//			roth	96.05.26
+			SetPerl(pPerl);	
 
 			theImage = gdImageCreateFromGd(theFile);
 
@@ -478,10 +514,17 @@ XS(XS_GD__Image_gd__Gif)
 	}else{
 	    croak("image is not of type GD::Image");
 	}
-
+				//	Must make sure we open this in Write Binary "rb"
+				//	mode for Win32
+				//			Dave Roth	96.05.18
 	theFile = fdopen(filedescriptor, "wb");
 	
 	if (theFile){
+			//	We must set the CPerl object so that GD will know how to 
+			//	contend with with the overloaded functions.
+			//			roth	96.05.26
+		SetPerl(pPerl);	
+
 		gdImageGif(image,theFile);
 		if (fflush(theFile)){
 			bResult = FALSE;
@@ -513,8 +556,11 @@ XS(XS_GD__Image_gd__Gd)
 	gdImagePtr theImage;
 	FILE*	theFile;
 	BOOL	bResult = TRUE;
-		
-	theFile = fdopen(filedescriptor,"wb");
+
+				//	Must make sure we open this in Write Binary "rb"
+				//	mode for Win32
+				//			Dave Roth	96.05.18
+	theFile = _fdopen(filedescriptor,"wb");
 	if (theFile != NULL) {
 		gdImageGd(image,theFile);
 		if (fflush(theFile)){

@@ -1,45 +1,94 @@
-#!/usr/local/bin/perl
 
-use GD;
+    use GD;
 
-$| = 1;
+    print "Content-type: image/gif\n\n";
 
-$File = "\&STDOUT" unless ($File) = @ARGV;
+    $File = "\&STDOUT" unless ($File) = @ARGV;
 
-print "Content-type: image/gif\n\n";
-        
-# create a new image
-$im = new GD::Image(100,100);
+    open(GRFILE, "< test.gif") || die;
+    binmode GRFILE;
+    $im = newFromGif GD::Image(GRFILE) || die;
 
-# allocate some colors
-$white = $im->colorAllocate(255,255,255);
-$black = $im->colorAllocate(0,0,0);       
-$red = $im->colorAllocate(255,0,0);      
-$blue = $im->colorAllocate(0,0,255);
-$green = $im->colorAllocate(0,255,0);
+    $white = GetColor($im, 255, 255, 255);
+    $black = GetColor($im, 0, 0, 0);
+    $red = GetColor($im, 255, 127, 127);
+    $blue = GetColor($im, 0, 0, 255);
+    $green = GetColor($im, 0, 255, 0);
+    $darkgreen = GetColor($im, 0, 127, 0);
+    $verydarkgreen = GetColor($im, 0, 16, 0);
 
-# make the background transparent and interlaced
-$im->transparent($white);
-$im->interlaced('true');
+        #foreach(<GRFILE>){print;}
+    close (GRFILE);
 
-# Put a black frame around the picture
-$im->rectangle(0,0,99,99,$black);
+        # Convert the image to GIF and print it on standard output
+    ($Ix, $Iy) = $im->getBounds();
+    print "\nImage is $Ix pixels wide and $Iy pixels tall.\n\n";
 
-# Draw a blue oval
-$im->arc(50,50,95,75,0,360,$blue);
+    $Fx = GD::Font::width(gdLargeFont);
+    $Fy = GD::Font::height(gdLargeFont);
 
-# And fill it with red
-$im->fill(50,50,$red);
+    $TotalCols = int($Ix/$Fx);
+    $TotalRows = int($Iy/$Fy);
 
-# Add the creative string!...
-$im->string(gdSmallFont,23,40,"Win32::GD",$green);
-$im->string(gdSmallFont,23,50,"  Rules!",$green);
+    Draw("Win32::GD Rules!");
 
-# Convert the image to GIF and print it on standard output
-if ($im->gif($File)){
-    print STDERR "\n\nThe file was successfully dumped to \"$File\"\n";
-}else{
-    print STDERR "\n\nThe file failed to be written to \"$File\"\n";
+    # Convert the image to GIF and print it on standard output
+    if ($im->gif($File)){
+        print STDERR "\n\nThe file was successfully dumped to \"$File\"\n";
+    }else{
+        print STDERR "\n\nThe file failed to be written to \"$File\"\n";
+    }
+
+sub GetColor{
+    my($Gif, $Red, $Green, $Blue) = @_;
+    my($Color);
+
+    $Result = $Gif->colorAllocate($Red, $Green, $Blue);
+    if ($Result == -1){
+        $Result = $Gif->colorClosest($Red, $Green, $Blue);
+    }
+    return $Result;
+}
+
+
+
+sub Draw{
+    my($String, $Row) = @_;
+    my($X, $Y);
+    my($Copy);
+
+    $X = int( (int($TotalCols - length($String)) * $Fx) / 2);
+    $Y = int( (int($TotalRows - 0) * $Fy) / 2);
+    print "Printing \"$String\" at ($X, $Y).\n\n";
+
+
+    $dX = length($String) * $Fx;
+    $dY = $Fy;
+
+    $Buffer = 6;
+
+    $Copy = new GD::Image($dX + ($Buffer), $dY + ($Buffer));
+
+    print "Copying a portion of the graphic to a buffer...\n";
+    $Copy->copy($im, 0, 0, $X - ($Buffer/2),  $Y - ($Buffer/2), $dX + ($Buffer), $dY + ($Buffer));
+
+    print "Drawing a rectangle and filling it in...\n";
+    $im->filledRectangle($X - ($Buffer * 2), $Y - ($Buffer * 2), $X + $dX + ($Buffer * 2) , $Y + $dY + ($Buffer * 2), $blue);
+
+    print "Drawing a border around the rectangle...\n";
+    $im->rectangle($X - ($Buffer * 2), $Y - ($Buffer * 2), $X + $dX + ($Buffer * 2), $Y + $dY + ($Buffer * 2), $green);
+
+    print "Copying the saved buffer back to the graphic...\n";
+    $im->copy($Copy, $X - ($Buffer/2), $Y - ($Buffer/2), 0, 0, $dX + ($Buffer), $dY + ($Buffer));
+
+    print "Drawing a border around the copied area...\n";
+    $im->rectangle($X - ($Buffer/2) - 1, $Y - ($Buffer/2) - 1, $X + $dX + ($Buffer) - ($Buffer/2), $Y + $dY + ($Buffer) - ($Buffer/2), $black);
+
+    print "Printing text to graphic...\n";
+    $im->string(gdLargeFont, $X + 2, $Y + 2, $String, $verydarkgreen);
+    $im->string(gdLargeFont, $X + 1, $Y + 1, $String, $darkgreen);
+    $im->string(gdLargeFont, $X, $Y, $String, $green);
+
 }
 
 

@@ -110,6 +110,21 @@
 		int gdGetDebug();
 		int gdSetDebug(int i);
 
+
+		#ifndef H_PERL 
+			#include "EXTERN.h"
+			#include "perl.h"
+			#include "XSUB.h"
+		#endif
+
+		#ifdef H_PERL
+			#ifdef WIN32
+			
+				CPerl *SetPerl(CPerl *pPerlObj);
+				CPerl *GetPerl();
+			#endif
+		#endif			
+
         gdImagePtr gdImageCreate(int sx, int sy);
         gdImagePtr gdImageCreateFromGif(FILE *fd);
         gdImagePtr gdImageCreateFromGd(FILE *in);
@@ -153,6 +168,16 @@
         void gdImageSetStyle(gdImagePtr im, int *style, int noOfPixels);
                 /* On or off (1 or 0) */
         void gdImageInterlace(gdImagePtr im, int interlaceArg);
+
+
+		static int ReadColorMap (FILE *fd, int number, unsigned char (*buffer)[256]);
+		static int DoExtension (FILE *fd, int label, int *Transparent);
+		static int GD_GetDataBlock (FILE *fd, unsigned char *buffer);
+		static int GetCode (FILE *fd, int code_size, int flag);
+		static int LWZReadByte (FILE *fd, int flag, int input_code_size);
+		static void ReadImage (gdImagePtr im, FILE *fd, int len, int height, unsigned char (*cmap)[256], int interlace, int ignore);
+
+
     #ifdef __cplusplus
         }
     #endif
