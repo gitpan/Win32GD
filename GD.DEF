@@ -1,0 +1,3 @@
+LIBRARY GD
+EXPORTS
+	boot_GD
