@@ -3,6 +3,8 @@ GD.pm A perl5 interface to Thomas Boutell's gd library.
 Modified ever so slightly for use in Win32 Perl by
     Dave Roth <dave@roth.net> or <roth@panda.dnr.state.mi.us>
 
+Modified by Andreas Koenig while Dave is on vacation: added $VERSION
+to GD.PM to enable CPAN to ignore this ported version (June 11, 1996)
 
 ABSTRACT:
 

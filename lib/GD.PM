@@ -1,5 +1,6 @@
 package GD;
 
+$VERSION="0.0port_for_OS2";
 # Copyright 1995 Lincoln D. Stein.  See accompanying README file for
 # usage information
 
